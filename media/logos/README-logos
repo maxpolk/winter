@@ -1,0 +1,12 @@
+The image Winter-logo-source.jpg, from which the logos derived, came from:
+
+    http://commons.wikimedia.org/wiki/File:Schnee1.jpg
+
+This public domain image was altered in Gimp to reverse the image,
+add an alpha channel, make the background transparent, then use
+the colorize tool with settings somewhere around 210,62,29, and
+then resized.
+
+Resizing down to 14x14 produced a blur, therefore it was first
+resized to 32x32, touched up, colors made more saturated, and
+then resized to 14x14 so it looks actually like a snowflake.
