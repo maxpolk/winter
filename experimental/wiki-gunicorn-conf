@@ -1,0 +1,14 @@
+CONFIG = {
+    'working_dir': '/var/www/bottle/wiki',
+    'environment': {
+        'SCRIPT_NAME_25': 'wikifun'   # just to show how it's done
+    },
+#    'user': 'www-data',               # uncomment to run as this user
+#    'group': 'www-data',              # uncomment to run as this group
+    'args': (
+        '--bind=127.0.0.1:8003',
+        '--workers=2',
+        '--timeout=60',
+        'app:application',
+    ),
+}

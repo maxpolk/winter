@@ -1,0 +1,35 @@
+----------------------------------------------------------------------
+HOW TO RUN
+
+Install onto Ubuntu 12.10 packages:
+* python-bottle (on 2013-02-13 version was 0.10.11-1)
+* gunicorn (on 2013-02-13 version was 0.14.5-3ubuntu1)
+* maybe need pip after all for Pyro4
+
+Place file "app.py" into /var/www/bottle/wiki
+
+Copy file "wiki-gunicorn-conf" as /etc/gunicorn.d/wiki
+
+Integrate nginx-default into /etc/nginx/sites-available/default
+
+Run one of three ways.  First cd /var/www/bottle/wiki, then pick one:
+* python app.py                # run as main
+* gunicorn app:application     # run under gunicorn manually
+* service gunicorn start       # run as a service
+* service nginx start          # run bottle through nginx proxy
+
+View log at /var/log/gunicorn.d/wiki.log
+
+----------------------------------------------------------------------
+HOW TO RUN WITHOUT SERVER INSTALLATION
+
+Create a virtual environment then install bottle there and run the app:
+* cd PlaceForVirtualEnvironments
+* virtualenv chill
+* source chill/bin/activate
+* pip install bottle
+* python app.py                # run as main
+
+To run under gunicorn:
+* pip install gunicorn
+* gunicorn app:application
