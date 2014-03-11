@@ -10,7 +10,7 @@ License located at http://www.gnu.org/licenses/agpl-3.0.html
 
 # Last two digits of year, followed by two digit month.
 # YYMM of release date, restrict to [0-9]{4} (used by setup.py)
-__software_date__ = "1402"
+__software_date__ = "1403"
 
 # Type of release, use "a" for alpha, "b" for beta, "c" for release candidate,
 # and "" (the empty string) or "final" for final release version.
