@@ -15,7 +15,7 @@ sys.path.append (os.path.join (os.path.dirname (__file__), '..'))
 from winter.server import setupOptions, setupSystem, runCommands, long_description
 
 # Setup options
-options = setupOptions (sys.argv)
+options = setupOptions (sys.argv[1:])
 if (options.verbose):
     print long_description
 
