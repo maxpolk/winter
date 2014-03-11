@@ -7,17 +7,18 @@ Copyright (C) 2012,2014  Max Polk <maxpolk@gmail.com>
 License located at http://www.gnu.org/licenses/agpl-3.0.html
 '''
 import sys
+import os
 
 # We are in a bin subdir, but parent dir is where packages are found
-sys.path.append ("..")
+sys.path.append (os.path.join (os.path.dirname (__file__), '..'))
 
-from winter.cli import setupOptions, setupSystem, runCommands, long_description
+from winter.server import setupOptions, setupSystem, runCommands, long_description
 
 # Setup options
-(default_options, options, arguments) = setupOptions (sys.argv)
+options = setupOptions (sys.argv)
 if (options.verbose):
     print long_description
 
 # Setup system and run it
-interwiki = setupSystem (default_options, options)
-runCommands (interwiki, arguments)
+interwiki = setupSystem (options)
+runCommands (interwiki)
