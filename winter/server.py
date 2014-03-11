@@ -8,7 +8,7 @@ License located at http://www.gnu.org/licenses/agpl-3.0.html
 
 # Library imports
 import argparse                     # read/parse command-line options
-import ConfigParser                 # read/write config file
+# import ConfigParser                 # read/write config file
 import os
 
 # Import the current package to get package vars like winter.software_name
@@ -29,7 +29,7 @@ def setupOptions (args):
     '''
     # All options always exist because we use defaults if not present
     parser = argparse.ArgumentParser (prog=winter.software_name,
-                                      usage="Usage: %prog [options]",
+                                      usage="%(prog)s [options]",
                                       description=long_description)
 
     # Version
@@ -48,7 +48,7 @@ def setupOptions (args):
         "-c", "--config",
         default = os.path.expanduser ("~/.winterrc"),
         metavar = "FILE",
-        help = "configuration file [default: %default]")
+        help = "configuration file  [default: %(default)s]")
 
     # No config, don't read or write config file, higher priority than -c option
     parser.add_argument (
@@ -60,20 +60,20 @@ def setupOptions (args):
     parser.add_argument (
         "-d", "--directory",
         default = os.path.expanduser ("~/.winter"),
-        help = "directory to be used for file cache")
+        help = "directory to be used for file cache [default: %(default)s]")
 
     # Add hostname where to find MongoDB database
     parser.add_argument (
         "--dbhost",
         default = '127.0.0.1',
-        help = "hostname of MongoDB database")
+        help = "hostname of MongoDB database [default: %(default)s]")
 
     # Add a port number to MongoDB database
     parser.add_argument (
         "--dbport",
         default = 27017,
         type = int,
-        help = "port number of MongoDB database")
+        help = "port number of MongoDB database [default: %(default)s]")
 
     # Everything else goes into "arguments" option
     parser.add_argument (
@@ -84,20 +84,24 @@ def setupOptions (args):
     options = parser.parse_args (args)
 
     if (options.verbose):
-        def show (name, value):
-            print "    {0:15}: {1}".format (name, value)
-        # Debug temp variables
+        def show (name, value, default_value):
+            suffix = ""
+            if (default_value is not None and value != default_value):
+                suffix = " (default {})".format (default_value)
+            print "    {0:15}: {1}{2}".format (name, value, suffix)
+        # Turn options into a dictionary and iterate
         print "Parsed command-line options: "
-        show ("verbose", options.verbose)
-        show ("config", options.config)
-        show ("noconfig", options.noconfig)
-        show ("collection", options.collection)
-        show ("url", options.url)
-        show ("directory", options.directory)
+        option_dict = vars (options)
+        for key in option_dict:
+            # Get default value for option
+            default_value = parser.get_default (key)
+            value = getattr (options, key) # option_dict[key]
+            is_default = (default_value == value)
+            show (key, value, default_value)
         if len(options.arguments) > 1:
             print "Parsed command-line arguments:"
-            for arg in options.arguments[1:]:
-                show ("argument", arg)
+            for arg in options.arguments:
+                show ("argument", arg, None)
 
     return options
 
