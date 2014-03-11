@@ -38,4 +38,4 @@ function Fail
 DIR=$(ScriptDirectory)
 cd "$DIR/.." || Fail "Unable to change directory $DIR/.."
 
-python -m winter.tests -v
+python -m winter.test.tests -v
