@@ -6,7 +6,7 @@ Experimental app server that runs under python as main or gunicorn as app:applic
 '''
 import os
 import bottle  # for bottle.default_app
-from bottle import route, get, post, put, delete, template, run, request, response
+from bottle import get, post, put, delete, template, run, request, response
 import re
 
 # Change working directory so relative paths and template lookup work again
@@ -73,7 +73,7 @@ def helloRootGet  ():
     '''Special case of get of resource when resource is empty.'''
     normalizeScriptName (request)
     return template ('root.tpl', links = [
-        'abc', 'abc/+', 'json', 'json/+/history?page=3&size=20', 'x/y/z'])
+        'abc', 'abc/+', 'json', 'json/+/history?page=3&size=20', 'x/y/z', '+'])
 
 @get ('/+')
 def helloRootAllMetadata ():
@@ -92,6 +92,24 @@ def helloResourceAllMetadata (resource):
     '''List all metadata associated with a resource.'''
     normalizeScriptName (request)
     resource = normalizeResource (resource)
+    if (resource == ''):
+        import pymongo
+        client = pymongo.MongoClient ("localhost", 27017)
+        db = client.wiki                        # database dedicated to the wiki
+        return template ("The database name is '{{name}}'", name=db.name)
+        #=======================================================================
+        # db.my_collection                        # Collection(Database(MongoClient('localhost', 27017), u'wiki'), u'my_collection')
+        # db.my_collection.save({"x": 10})        # ObjectId('4aba15ebe23f6b53b0000000')
+        # db.my_collection.save({"x": 8})         # ObjectId('4aba160ee23f6b543e000000')
+        # db.my_collection.save({"x": 11})        # ObjectId('4aba160ee23f6b543e000002')
+        # db.my_collection.find_one()             # {u'x': 10, u'_id': ObjectId('4aba15ebe23f6b53b0000000')}
+        # for item in db.my_collection.find():
+        #     print (item["x"])
+        # db.my_collection.create_index("x")      # u'x_1'
+        # for item in db.my_collection.find().sort("x", pymongo.ASCENDING):
+        #     print (item["x"])
+        # [item["x"] for item in db.my_collection.find().limit(2).skip(1)]        # [8, 11]
+        #=======================================================================
     return template ("List all metadata associated with resource '/{{resource}}'", resource=resource)
 
 @get ('/<resource:path>/+/history')
