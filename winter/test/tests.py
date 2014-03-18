@@ -8,11 +8,11 @@ License located at http://www.gnu.org/licenses/agpl-3.0.html
 
 import unittest
 
-import winter.cli
+import winter.server
 
 class TestMetadata (unittest.TestCase):
     def test_description (self):
-        assert len (winter.cli.long_description) > 0, 'invalid long_description'
+        assert len (winter.server.long_description) > 0, 'invalid long_description'
 
 if __name__ == '__main__':
     unittest.main ()
