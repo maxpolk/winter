@@ -7,9 +7,13 @@ License located at http://www.gnu.org/licenses/agpl-3.0.html
 '''
 
 # Library imports
-import argparse                     # read/parse command-line options
-# import ConfigParser                 # read/write config file
+import argparse                         # read/parse command-line options
 import os
+
+try:
+    import configparser.ConfigParser    # Python 3 configuration file parsing
+except:
+    import ConfigParser                 # Python 2 configuration file parsing
 
 # Import the current package to get package vars like winter.software_name
 import winter
@@ -83,6 +87,7 @@ def setupOptions (args):
     # Place results into options variable
     options = parser.parse_args (args)
 
+    # @@@@@TODO: So far just dump info gathered
     if (options.verbose):
         def show (name, value, default_value):
             suffix = ""
@@ -103,6 +108,42 @@ def setupOptions (args):
             for arg in options.arguments:
                 show ("argument", arg, None)
 
+    # Optionally read configuration file
+    config = ConfigParser()
+    #
+    # config: get, getint, getfloat(), getboolean()
+    #
+    # import configparser
+    # config = configparser.ConfigParser()
+    #
+    # WRITING
+    #
+    # config['DEFAULT'] = {'ServerAliveInterval': '45',
+    # ...                  'Compression': 'yes',
+    # ...                  'CompressionLevel': '9'}
+    # config['bitbucket.org'] = {}
+    # config['bitbucket.org']['User'] = 'hg'
+    # config['topsecret.server.com'] = {}
+    # topsecret = config['topsecret.server.com']
+    # topsecret['Port'] = '50022'     # mutates the parser
+    # topsecret['ForwardX11'] = 'no'  # same here
+    # config['DEFAULT']['ForwardX11'] = 'yes'
+    # with open('example.ini', 'w') as configfile:
+    # ...   config.write(configfile)
+    #
+    # READING
+    #
+    # config.read('example.ini')    # ['example.ini']
+    # config.sections()             # ['bitbucket.org', 'topsecret.server.com']
+    # 'bitbucket.org' in config     # True
+    # 'bytebong.com' in config      # False
+    # config['bitbucket.org']['User']    # some string
+    # config['DEFAULT']['Compression']   # some string
+    # topsecret = config['topsecret.server.com']
+    # topsecret['ForwardX11']       # section value
+    # topsecret['Port']             # '50022' not an int, use getint instead
+    # for key in config['bitbucket.org'] ....
+    #
     return options
 
 def setupSystem (options):
