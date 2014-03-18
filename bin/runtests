@@ -38,4 +38,25 @@ function Fail
 DIR=$(ScriptDirectory)
 cd "$DIR/.." || Fail "Unable to change directory $DIR/.."
 
-python -m winter.test.tests -v
+# Default Python version
+PY=$(hash python 2>/dev/null && hash -t python | head -1)
+if [ ! -z "$PY" ]; then
+    PY_VERSION=$($PY --version 2>&1)
+    echo "===================="
+    echo "$PY_VERSION"
+    echo "===================="
+    python -m winter.test.tests -v
+fi
+
+# Specific Python 3 version
+PY3=$(hash python3 2>/dev/null && hash -t python3 | head -1)
+if [ ! -z "$PY3" ]; then
+    # Only run additional test if default is not Python 3 (such as Python 2)
+    if [ ! "$PY" = "$PY3" ]; then
+        PY3_VERSION=$($PY3 --version 2>&1)
+        echo "===================="
+        echo "$PY3_VERSION"
+        echo "===================="
+        python -m winter.test.tests -v
+    fi
+fi
