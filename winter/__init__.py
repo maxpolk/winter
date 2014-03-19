@@ -23,7 +23,7 @@ software_name = "Winter"
 software_version = "{}.{}".format (__software_date__, __software_type__)
 
 # Short description of this software
-software_description = "{}, a wiki-based computing platform".format (software_name)
+software_description = "a wiki-based computing platform"
 
 # Long description of this software
 software_long_description = '''
