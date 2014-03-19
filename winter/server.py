@@ -11,9 +11,9 @@ import argparse                         # read/parse command-line options
 import os
 
 try:
-    import configparser.ConfigParser    # Python 3 configuration file parsing
+    from configparser import ConfigParser # Python 3 configuration file parsing
 except:
-    import ConfigParser                 # Python 2 configuration file parsing
+    from ConfigParser import ConfigParser # Python 2 configuration file parsing
 
 # Import the current package to get package vars like winter.software_name
 import winter
@@ -22,9 +22,8 @@ import winter
 module_description = "server module"
 
 # Module long description
-long_description = "{} ({}): {}, {}".format (
-    winter.software_name, winter.software_version,
-    winter.software_description, module_description)
+long_description = "{} ({}): {}".format (
+    winter.software_name, winter.software_version, winter.software_description)
 
 def setupOptions (args):
     '''
@@ -33,7 +32,7 @@ def setupOptions (args):
     '''
     # All options always exist because we use defaults if not present
     parser = argparse.ArgumentParser (prog=winter.software_name,
-                                      usage="%(prog)s [options]",
+                                      usage="%(prog)s [options] [arguments]",
                                       description=long_description)
 
     # Version
@@ -47,6 +46,12 @@ def setupOptions (args):
         action = "store_true", default = False,
         help = "display more information about client operation")
 
+    # No config, don't read or write config file, higher priority than -c option
+    parser.add_argument (
+        "-n", "--noconfig",
+        action = "store_true", default = False,
+        help = "do not use a configuration file")
+
     # Config file for various options
     parser.add_argument (
         "-c", "--config",
@@ -54,11 +59,17 @@ def setupOptions (args):
         metavar = "FILE",
         help = "configuration file  [default: %(default)s]")
 
-    # No config, don't read or write config file, higher priority than -c option
+    # What profile within the config file to use
     parser.add_argument (
-        "-n", "--noconfig",
+        "-p", "--profile",
+        default = "DEFAULT",            # has magic properties in ConfigParser
+        help = "configuration file profile to use")
+
+    # Save configuration file with current options under given profile name
+    parser.add_argument (
+        "-s", "--save",
         action = "store_true", default = False,
-        help = "do not use a configuration file")
+        help = "save configuration file under given profile name")
 
     # Directory to be used for file cache, overrides config file value
     parser.add_argument (
@@ -79,6 +90,12 @@ def setupOptions (args):
         type = int,
         help = "port number of MongoDB database [default: %(default)s]")
 
+    # Add database name to use for MongoDB database
+    parser.add_argument (
+        "--dbname",
+        default = 'winter',
+        help = "database name to use inside MongoDB database [default: %(default)s]")
+
     # Everything else goes into "arguments" option
     parser.add_argument (
         "arguments",
@@ -87,7 +104,7 @@ def setupOptions (args):
     # Place results into options variable
     options = parser.parse_args (args)
 
-    # @@@@@TODO: So far just dump info gathered
+    # If verbose, dump config options gathered
     if (options.verbose):
         def show (name, value, default_value):
             suffix = ""
@@ -97,7 +114,7 @@ def setupOptions (args):
         # Turn options into a dictionary and iterate
         print "Parsed command-line options: "
         option_dict = vars (options)
-        for key in option_dict:
+        for key in sorted (option_dict):
             # Get default value for option
             default_value = parser.get_default (key)
             value = getattr (options, key) # option_dict[key]
@@ -109,7 +126,25 @@ def setupOptions (args):
                 show ("argument", arg, None)
 
     # Optionally read configuration file
-    config = ConfigParser()
+    if (not options.noconfig):
+        # options.verbose (verbosity)
+        # options.noconfig (overrides config)
+        # options.config (filename)
+        # options.profile (profile name within config file)
+        # options.save (save config file)
+        # options.directory (cache dir)
+        # options.dbhost (database host)
+        # options.dbport (database port)
+        # options.dbname (database name)
+        # options.arguments  (everything else)
+        if (options.verbose):
+            print ("Reading config file {}".format (options.config))
+        config = ConfigParser ()
+        config.read (options.config)
+        if (options.save):
+            # Save config file
+            print "Writing configuration file (not yet)"
+
     #
     # config: get, getint, getfloat(), getboolean()
     #
@@ -150,17 +185,6 @@ def setupSystem (options):
     '''
     Instantiate and return an wiki system using the default and given options.
     '''
-    # If not ignoring config file, read it
-    if (not options.noconfig):
-        # Read config file for config file options
-        print "DEBUG: Reading configuration file (not yet)"
-        pass
-
-    # If not ignoring config file, write changes
-    if (not options.noconfig):
-        print "DEBUG: Writing configuration file (not yet)"
-        pass
-
     return "TODO"
 
 def runCommands (wiki):
