@@ -110,9 +110,9 @@ def setupOptions (args):
             suffix = ""
             if (default_value is not None and value != default_value):
                 suffix = " (default {})".format (default_value)
-            print "    {0:15}: {1}{2}".format (name, value, suffix)
+            print ("    {0:15}: {1}{2}".format (name, value, suffix))
         # Turn options into a dictionary and iterate
-        print "Parsed command-line options: "
+        print ("Parsed command-line options: ")
         option_dict = vars (options)
         for key in sorted (option_dict):
             # Get default value for option
@@ -121,64 +121,64 @@ def setupOptions (args):
             is_default = (default_value == value)
             show (key, value, default_value)
         if len(options.arguments) > 1:
-            print "Parsed command-line arguments:"
+            print ("Parsed command-line arguments:")
             for arg in options.arguments:
                 show ("argument", arg, None)
 
     # Optionally read configuration file
     if (not options.noconfig):
-        # options.verbose (verbosity)
-        # options.noconfig (overrides config)
-        # options.config (filename)
-        # options.profile (profile name within config file)
-        # options.save (save config file)
-        # options.directory (cache dir)
-        # options.dbhost (database host)
-        # options.dbport (database port)
-        # options.dbname (database name)
-        # options.arguments  (everything else)
+        # Read options
         if (options.verbose):
             print ("Reading config file {}".format (options.config))
         config = ConfigParser ()
         config.read (options.config)
+        # Fill in defaults not already inside the config file
+        option_dict = vars (options)
+        for key in ("dbhost", "dbname", "dbport", "directory"):
+            # Get default value for option
+            default_value = parser.get_default (key)
+            if (not config.has_option ("DEFAULT", key)):
+                if (options.verbose):
+                    print ("Adding missing default {} to value {}".format (
+                        key, default_value))
+                config.set ("DEFAULT", key, str (default_value))
+        # Get desired profile, creating if necessary
+        if (options.profile != "DEFAULT" and not config.has_section (options.profile)):
+            config.add_section (options.profile)
+        if (options.profile == "DEFAULT"):
+            profile = config.defaults ()
+        else:
+            profile = config.options (options.profile)
+        # Dump profile before command-line overrides
+        if (options.verbose):
+            print ("Profile values for section {}:".format (options.profile))
+            for key in profile:
+                print ("    {} = {}".format (key, config.get (options.profile, key)))
+        # Let command options override config file values
+        for key in ("dbhost", "dbname", "dbport", "directory"):
+            value = str (getattr (options, key))
+            config_value = config.get (options.profile, key)
+            config_default_value = config.get ("DEFAULT", key)
+            if (options.profile == "DEFAULT" and config_default_value != value):
+                if (options.verbose):
+                    print ("Overriding default option with command-line option {} = {}".format (key, value))
+                config.set (options.profile, key, value)
+            if (options.profile != "DEFAULT" and str (parser.get_default (key)) != value and config_value != value):
+                if (options.verbose):
+                    print ("Overriding config option with command-line option {} = {}".format (key, value))
+                config.set (options.profile, key, value)
+        # Dump profile with overrides, the final values to use
+        if (options.verbose):
+            print ("Profile values to use:")
+            for key in profile:
+                print ("    {} = {}".format (key, config.get (options.profile, key)))
+        # Save options
         if (options.save):
             # Save config file
-            print "Writing configuration file (not yet)"
+            print ("Writing configuration file {}".format (options.config))
+            with open (options.config, 'w') as configfile:
+                config.write (configfile)
 
-    #
-    # config: get, getint, getfloat(), getboolean()
-    #
-    # import configparser
-    # config = configparser.ConfigParser()
-    #
-    # WRITING
-    #
-    # config['DEFAULT'] = {'ServerAliveInterval': '45',
-    # ...                  'Compression': 'yes',
-    # ...                  'CompressionLevel': '9'}
-    # config['bitbucket.org'] = {}
-    # config['bitbucket.org']['User'] = 'hg'
-    # config['topsecret.server.com'] = {}
-    # topsecret = config['topsecret.server.com']
-    # topsecret['Port'] = '50022'     # mutates the parser
-    # topsecret['ForwardX11'] = 'no'  # same here
-    # config['DEFAULT']['ForwardX11'] = 'yes'
-    # with open('example.ini', 'w') as configfile:
-    # ...   config.write(configfile)
-    #
-    # READING
-    #
-    # config.read('example.ini')    # ['example.ini']
-    # config.sections()             # ['bitbucket.org', 'topsecret.server.com']
-    # 'bitbucket.org' in config     # True
-    # 'bytebong.com' in config      # False
-    # config['bitbucket.org']['User']    # some string
-    # config['DEFAULT']['Compression']   # some string
-    # topsecret = config['topsecret.server.com']
-    # topsecret['ForwardX11']       # section value
-    # topsecret['Port']             # '50022' not an int, use getint instead
-    # for key in config['bitbucket.org'] ....
-    #
     return options
 
 def setupSystem (options):
@@ -188,9 +188,7 @@ def setupSystem (options):
     return "TODO"
 
 def runCommands (wiki):
-    print "Running commands: (not yet)"
-    # for arg in arguments[1:]:
-    #     print "    arg:", arg
+    print ("Running commands: (not yet)")
 
 # Running modules as top-level scripts is an antipattern, use bin/snow instead
 if __name__ == '__main__':
