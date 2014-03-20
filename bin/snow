@@ -17,7 +17,7 @@ from winter.server import setupOptions, setupSystem, runCommands, long_descripti
 # Setup options
 options = setupOptions (sys.argv[1:])
 if (options.verbose):
-    print long_description
+    print (long_description)
 
 # Setup system and run it
 interwiki = setupSystem (options)
