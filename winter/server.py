@@ -10,6 +10,7 @@ License located at http://www.gnu.org/licenses/agpl-3.0.html
 import argparse                         # read/parse command-line options
 import os
 
+# TEMPORARY!  WE WILL PUT 2 AND 3 INTO SEPARATE DIRS
 try:
     from configparser import ConfigParser # Python 3 configuration file parsing
 except:
