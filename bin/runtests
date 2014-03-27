@@ -45,7 +45,7 @@ if [ ! -z "$PY" ]; then
     echo "===================="
     echo "$PY_VERSION"
     echo "===================="
-    python -m winter.test.tests -v
+    $PY -m winter.test.tests -v
 fi
 
 # Specific Python 3 version
@@ -57,6 +57,6 @@ if [ ! -z "$PY3" ]; then
         echo "===================="
         echo "$PY3_VERSION"
         echo "===================="
-        python -m winter.test.tests -v
+        $PY3 -m winter.test.tests -v
     fi
 fi
