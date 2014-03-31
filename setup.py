@@ -19,13 +19,30 @@ This file is part of Winter, a wiki-based computing platform.
 Copyright (C) 2012  Max Polk <maxpolk@gmail.com>
 '''
 from setuptools import setup, find_packages
+
+# Pick what to install
+import sys
+if sys.version_info[0] == 2:
+    base_dir = 'python2'
+elif sys.version_info[0] == 3:
+    base_dir = 'python3'
+
+# We need to use the correct path for packages
+import os
+sys.path.append (os.path.join (os.path.dirname (__file__), base_dir))
+
 import winter
 
 setup (
     name=winter.software_name,
     version=winter.software_version,
-    packages = find_packages (),
-    scripts = ['bin/runtests', 'bin/snow'],
+    packages = ['winter', 'winter.test'],
+    package_dir = {
+        'winter': os.path.join (base_dir, 'winter'),
+        'winter.test': os.path.join (base_dir, 'winter', 'test')
+    },
+    scripts = [os.path.join (base_dir, 'bin', 'runtests'),
+               os.path.join (base_dir, 'bin', 'snow')],
     install_requires = ['bottle'],
     package_data = {
         # If any package contains *.txt or *.rst files, include them:
