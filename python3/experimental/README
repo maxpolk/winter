@@ -13,7 +13,8 @@ Copy file "wiki-gunicorn-conf" as /etc/gunicorn.d/wiki
 Integrate nginx-default into /etc/nginx/sites-available/default
 
 Run one of three ways.  First cd /var/www/bottle/wiki, then pick one:
-* python app.py                # run as main
+* python app.py                # run as main under python 2
+* python3 app.py               # run as main under python 3
 * gunicorn app:application     # run under gunicorn manually
 * service gunicorn start       # run as a service
 * service nginx start          # run bottle through nginx proxy

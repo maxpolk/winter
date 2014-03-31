@@ -1,4 +1,3 @@
-#! /usr/bin/env python
 # Copyright (C) 2013  Max Polk
 # License located at http://www.gnu.org/licenses/agpl-3.0.html
 '''
