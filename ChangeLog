@@ -1,3 +1,7 @@
+2014-03-31  Max Polk  <maxpolk@gmail.com>
+
+	* Split Python 2 and Python 3 into separate source trees
+
 2014-02-25  Max Polk  <maxpolk@gmail.com>
 
 	* Added media directory, added initial file structure, and winter
