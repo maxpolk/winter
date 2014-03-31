@@ -38,25 +38,18 @@ function Fail
 DIR=$(ScriptDirectory)
 cd "$DIR/.." || Fail "Unable to change directory $DIR/.."
 
-# Default Python version
+# Default Python version which we assume is python 2
 PY=$(hash python 2>/dev/null && hash -t python | head -1)
 if [ ! -z "$PY" ]; then
-    PY_VERSION=$($PY --version 2>&1)
+    PY_FULL_VERSION=$($PY --version 2>&1)
+    PY_VERSION=$($PY -c $'import sys\nprint (sys.version_info[0])\n' 2>&1)
+    if [ ! "$PY_VERSION" = "2" ]; then
+        echo "Expected Python version 2, but running $PY returned version 3"
+        echo "Full version information: $PY_FULL_VERSION"
+        exit 1
+    fi
     echo "===================="
-    echo "$PY_VERSION"
+    echo "$PY_FULL_VERSION"
     echo "===================="
     $PY -m winter.test.tests -v
-fi
-
-# Specific Python 3 version
-PY3=$(hash python3 2>/dev/null && hash -t python3 | head -1)
-if [ ! -z "$PY3" ]; then
-    # Only run additional test if default is not Python 3 (such as Python 2)
-    if [ ! "$PY" = "$PY3" ]; then
-        PY3_VERSION=$($PY3 --version 2>&1)
-        echo "===================="
-        echo "$PY3_VERSION"
-        echo "===================="
-        $PY3 -m winter.test.tests -v
-    fi
 fi
