@@ -1,18 +1,23 @@
 '''
 Setup file to create a distribution.
 
-To create a source distribution, from this directory run:
+Based on whether you are using Python 2 or 3, a different root directory
+is picked.  This lets the burden of version compatibility rest upon the
+package authors and maintainers, rather than upon the users.
+
+To create a source distribution, from this directory run either of these
+to obtain a dist directory containing the distribution, and a Winter.egg-info
+directory:
 
     python setup.py sdist --formats=gztar,zip
+    python3 setup.py sdist --formats=gztar,zip
 
-    The result is a dist directory containing the distribution, and
-    a Winter.egg-info directory.
+Instead of "sdist" above, see the list of other standard commands with:
 
-Otherwise you might want to run this to obtain an egg:
+    python setup.py --help-commands
+    python3 setup.py --help-commands
 
-    python setup.py release sdist bdist_egg
-
-To upload to PyPi, read more about register and upload at:
+To upload to PyPi, read more about the "register" and "upload" commands at:
     http://pythonhosted.org/setuptools/setuptools.html#developer-s-guide
 
 This file is part of Winter, a wiki-based computing platform.
