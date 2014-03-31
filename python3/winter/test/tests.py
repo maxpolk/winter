@@ -12,7 +12,7 @@ import winter.server
 
 class TestMetadata (unittest.TestCase):
     def test_description (self):
-        assert len (winter.server.long_description) > 0, 'invalid long_description'
+        assert len (winter.server.module_description) > 0, 'invalid module_description'
 
 if __name__ == '__main__':
     unittest.main ()
