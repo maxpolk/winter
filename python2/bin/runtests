@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 
 #
 # Tests for Winter, run as a top-level file.
