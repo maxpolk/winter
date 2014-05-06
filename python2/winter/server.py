@@ -9,6 +9,7 @@ License located at http://www.gnu.org/licenses/agpl-3.0.html
 # Library imports
 import argparse                         # read/parse command-line options
 import os
+import pymongo
 
 from ConfigParser import ConfigParser
 
@@ -28,12 +29,12 @@ class Setup (object):
 
     def __init__ (self, args):
         '''
-        Read and return parsed command-line options and arguments.
+        Read and return parsed command-line options and command arguments.
         Command-line options override config file options.
         '''
         # All options always exist because we use defaults if not present
         parser = argparse.ArgumentParser (prog=winter.software_name,
-                                          usage="%(prog)s [options] [arguments]",
+                                          usage="%(prog)s [options] [commands]",
                                           description=self.long_description)
 
         # Version
@@ -97,10 +98,12 @@ class Setup (object):
             default = 'winter',
             help = "database name to use inside MongoDB database [default: %(default)s]")
 
-        # Everything else goes into "arguments" option
+        # Everything else goes into "commands" option.
+        # All choices must be recognized in System class in runCommands method.
         parser.add_argument (
-            "arguments",
-            nargs = argparse.REMAINDER)
+            "commands",
+            nargs = "*",
+            choices = ["hello", "test-db-connection"])
 
         # Place results into options variable
         options = parser.parse_args (args)
@@ -121,9 +124,9 @@ class Setup (object):
                 value = getattr (options, key) # option_dict[key]
                 is_default = (default_value == value)
                 show (key, value, default_value)
-            if len(options.arguments) > 1:
-                print ("Parsed command-line arguments:")
-                for arg in options.arguments:
+            if len(options.commands) > 1:
+                print ("Parsed command-line commands:")
+                for arg in options.commands:
                     show ("argument", arg, None)
 
         # Optionally read configuration file
@@ -201,7 +204,36 @@ class System (object):
         pass
 
     def runCommands (self):
-        print ("Running commands: {} (not yet)".format (self.options.arguments))
+        for command in self.options.commands:
+            if command == "test-db-connection":
+                self.test_db_connection ()
+            elif command == "hello":
+                print ("Hello")
+            else:
+                raise Exception ("ERROR: unknown command {}".format (command))
+
+    def test_db_connection (self):
+        print ("Testing database connection, host {}, port {}, database {}".format (
+            self.options.dbhost, self.options.dbport, self.options.dbname))
+        try:
+            # Make connection
+            client = pymongo.MongoClient (
+                host=self.options.dbhost, port=self.options.dbport)
+            client.admin.command ('ping')
+            print ("Connected without error:")
+            # Get server information
+            info = client.server_info ()
+            print ("    server version {}".format (info['version']))
+            # Get database and names of collections
+            database = client[self.options.dbname]
+            names = database.collection_names ()
+            print ("    database '{}' has {} collections".format (
+                self.options.dbname, len (names)))
+            client.disconnect ()
+        except pymongo.errors.InvalidName as ex:
+            print ("Invalid database name: {}".format (str (ex)))
+        except Exception as ex:
+            print ("Problem connecting: {}".format (str (ex)))
 
 # Running modules as top-level scripts is an antipattern, use bin/snow instead
 if __name__ == '__main__':
