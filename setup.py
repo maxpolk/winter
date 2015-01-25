@@ -1,20 +1,20 @@
 '''
 Setup file to create a distribution.
 
-Based on whether you are using Python 2 or 3, a different root directory
-is picked.  This lets the burden of version compatibility rest upon the
-package authors and maintainers, rather than upon the users.
+Python 2 is not supported!  It is a different language, with a different
+library, and different syntax.  No point diluting effort supporting
+multiple languages when one is just fine.  Please don't port to Python 2,
+instead, please try using Python 3.  Pushing for Python 2 is wasted effort
+for you AND OTHERS, for no gain whatsoever.  Don't do that.
 
-To create a source distribution, from this directory run either of these
-to obtain a dist directory containing the distribution, and a Winter.egg-info
+To create a source distribution, from this directory run the following which
+creates a dist directory containing the distribution, and a Winter.egg-info
 directory:
 
-    python setup.py sdist --formats=gztar,zip
     python3 setup.py sdist --formats=gztar,zip
 
 Instead of "sdist" above, see the list of other standard commands with:
 
-    python setup.py --help-commands
     python3 setup.py --help-commands
 
 To upload to PyPi, read more about the "register" and "upload" commands at:
@@ -28,7 +28,8 @@ from setuptools import setup, find_packages
 # Pick what to install
 import sys
 if sys.version_info[0] == 2:
-    base_dir = 'python2'
+    print ("Python 2 is not supported, please use Python 3")
+    exit (1)
 elif sys.version_info[0] == 3:
     base_dir = 'python3'
 
