@@ -49,7 +49,7 @@ setup (
     },
     scripts = [os.path.join (base_dir, 'bin', 'runtests'),
                os.path.join (base_dir, 'bin', 'snow')],
-    install_requires = ['bottle'],
+    install_requires = ['pymongo', 'tornado'],
     package_data = {
         # If any package contains *.txt or *.rst files, include them:
         '': ['*.txt', '*.rst', '*.md'],
