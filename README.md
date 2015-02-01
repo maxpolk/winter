@@ -4,6 +4,16 @@ Winter is a computing platform based on a wiki whose pages are code or data, com
 
 The goal of Winter is to bring software development to everyone.  No tool is needed other than a browser, and no skill is needed other than an ability to type simple text to morph data.  By emphasizing smaller steps and then combining them, no one page is ever complex.  Testing and releasing are built-in to complete the platform.
 
+# install
+
+To install, use PyPi, which should pull in the dependencies:
+
+    pip3 install winter
+
+If you change the source and/or want to create a distribution, use the setup.py script:
+
+    python3 setup.py sdist --formats=gztar,zip
+
 # license
 
 This project is licensed under version 3 of the GNU Affero General Public License, which you can read here: http://www.gnu.org/licenses/agpl-3.0.html
