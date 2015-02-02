@@ -1,9 +1,14 @@
+# This file is part of Winter, a wiki-based computing platform.
+# Copyright (C) 2012,2014,2015  Max Polk <maxpolk@gmail.com>
+# License located at http://www.gnu.org/licenses/agpl-3.0.html
 '''
-Server module for Winter.
+Server that launches notify, web, and daemon servers.
 
-This file is part of Winter, a wiki-based computing platform.
-Copyright (C) 2012,2014  Max Polk <maxpolk@gmail.com>
-License located at http://www.gnu.org/licenses/agpl-3.0.html
+Create the Setup class with command-line arguments, then ask it to createSystem
+to create a System object upon which you can runCommands.
+
+All service control occurs here, starting, stopping, and monitoring needed
+servers.
 '''
 
 # Library imports
@@ -17,7 +22,7 @@ from configparser import ConfigParser
 import winter
 
 # Module short description
-module_description = "server module"
+module_description = "initiate server module"
 
 class Setup (object):
     '''
@@ -37,73 +42,77 @@ class Setup (object):
                                           usage="%(prog)s [options] [commands]",
                                           description=self.long_description)
 
-        # Version
+        # Version: display and exit
         parser.add_argument (
             "--version",
             action="version", version=winter.software_version)
 
-        # Verbose
+        # Verbose: increase verbosity of command-line print output
         parser.add_argument (
             "-v", "--verbose",
             action = "store_true", default = False,
             help = "display more information about client operation")
 
-        # No config, don't read or write config file, higher priority than -c option
+        # No config: don't read or write config file, higher priority than -c option
         parser.add_argument (
             "-n", "--noconfig",
             action = "store_true", default = False,
             help = "do not use a configuration file")
 
-        # Config file for various options
+        # Config: specify file for various options
         parser.add_argument (
             "-c", "--config",
             default = os.path.expanduser ("~/.winterrc"),
             metavar = "FILE",
             help = "configuration file  [default: %(default)s]")
 
-        # What profile within the config file to use
+        # Profile: specify which profile within the config file to use
         parser.add_argument (
             "-p", "--profile",
             default = "DEFAULT",            # has magic properties in ConfigParser
             help = "configuration file profile to use")
 
-        # Save configuration file with current options under given profile name
+        # Save: save configuration file with current options under given profile name
         parser.add_argument (
             "-s", "--save",
             action = "store_true", default = False,
             help = "save configuration file under given profile name")
 
-        # Directory to be used for file cache, overrides config file value
+        # Directory: dir to be used for file cache, overrides config file value
         parser.add_argument (
             "-d", "--directory",
             default = os.path.expanduser ("~/.winter"),
             help = "directory to be used for file cache [default: %(default)s]")
 
-        # Add hostname where to find MongoDB database
+        # DB host: specify hostname where to find MongoDB database
         parser.add_argument (
             "--dbhost",
             default = '127.0.0.1',
             help = "hostname of MongoDB database [default: %(default)s]")
 
-        # Add a port number to MongoDB database
+        # DB port: specify port number to MongoDB database
         parser.add_argument (
             "--dbport",
             default = 27017,
             type = int,
             help = "port number of MongoDB database [default: %(default)s]")
 
-        # Add database name to use for MongoDB database
+        # DB name: specify database name to use for MongoDB database
         parser.add_argument (
             "--dbname",
             default = 'winter',
             help = "database name to use inside MongoDB database [default: %(default)s]")
 
-        # Everything else goes into "commands" option.
-        # All choices must be recognized in System class in runCommands method.
+        # Everything else goes into "commands".
+        #
+        # We fill choices with methods of System tagged with @command, which
+        # are the only valid command methods in the class.
+        #
         parser.add_argument (
             "commands",
             nargs = "*",
-            choices = ["hello", "test-db-connection"])
+            choices = [x for x in dir (System)
+                       if hasattr (getattr (System, x), "command")])
 
         # Place results into options variable
         options = parser.parse_args (args)
@@ -191,28 +200,46 @@ class Setup (object):
 
     def createSystem (self):
         '''
-        Instantiate and return an wiki system using the default and given options.
+        Instantiate and return a System using the default and given options.
         '''
         return System (self.options)
 
+def command (func):
+    '''
+    Tagging annotation for methods, adds the attribute "command" to the function.
+
+    Used in the System class to designate which functions are commands.
+    '''
+    setattr (func, "command", None)
+    return func
+
 class System (object):
     '''
-    The Winter system embodied as a single object.
+    The Winter system embodied as a single object that runs commands.
     '''
     def __init__ (self, options):
         self.options = options
         pass
 
     def runCommands (self):
+        '''
+        Iterate through user commands and perform them, which is actually just
+        calling various methods of this class.
+        '''
         for command in self.options.commands:
-            if command == "test-db-connection":
-                self.test_db_connection ()
-            elif command == "hello":
-                print ("Hello")
+            if (hasattr (self, command)):
+                getattr (self, command) ()
             else:
                 raise Exception ("ERROR: unknown command {}".format (command))
 
+    @command
+    def hello (self):
+        '''Command to print hello.'''
+        print ("Hello")
+
+    @command
     def test_db_connection (self):
+        '''Command to test the database connection.'''
         print ("Testing database connection, host {}, port {}, database {}".format (
             self.options.dbhost, self.options.dbport, self.options.dbname))
         try:
