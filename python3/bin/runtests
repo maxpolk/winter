@@ -1,13 +1,13 @@
 #! /bin/bash
 
-#
 # Tests for Winter, run as a top-level file.
-#
+
 # This file is part of Winter, a wiki-based computing platform.
 # Copyright (C) 2012,2014  Max Polk <maxpolk@gmail.com>
 # License located at http://www.gnu.org/licenses/agpl-3.0.html
-#
 
+#
+# Determine the actual directory where this script resides.
 #
 # Code from:
 # http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
@@ -29,16 +29,24 @@ function ScriptDirectory
     echo $DIR
 }
 
+#
+# Exit after printing a message
+#
 function Fail
 {
     echo "$@"
     exit 1
 }
 
+#
+# Carefully go one directory back so winter package references work
+#
 DIR=$(ScriptDirectory)
 cd "$DIR/.." || Fail "Unable to change directory $DIR/.."
 
-# Specific Python 3 version
+#
+# If we are Python 3, run the winter.test.tests module as main.
+#
 PY3=$(hash python3 2>/dev/null && hash -t python3 | head -1)
 if [ -z "$PY3" ]; then
     echo "Missing Python version 3"
