@@ -2,7 +2,7 @@
 # Copyright (C) 2012,2014,2015  Max Polk <maxpolk@gmail.com>
 # License located at http://www.gnu.org/licenses/agpl-3.0.html
 '''
-Server that launches notify, web, and daemon servers.
+Server that launches notification (notify), web, and calculation (calc) servers.
 
 Create the Setup class with command-line arguments, then ask it to createSystem
 to create a System object upon which you can runCommands.
