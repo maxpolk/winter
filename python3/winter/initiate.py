@@ -26,8 +26,8 @@ module_description = "initiate server module"
 
 class Setup (object):
     '''
-    Read command-line arguments, parse them, read and/or write a configuration
-    file, obtain a configuration profile, and begin Winter using these options.
+    Sets up all options from command-line and config file, writes config file.
+    Then creates a System object with all the options looked up and resolved.
     '''
     long_description = "{} ({}): {}".format (
         winter.software_name, winter.software_version, winter.software_description)
@@ -234,7 +234,7 @@ class System (object):
 
     @command
     def hello (self):
-        '''Command to print hello.'''
+        '''Command to print hello and do nothing else.'''
         print ("Hello")
 
     @command
