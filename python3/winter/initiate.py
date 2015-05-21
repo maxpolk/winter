@@ -11,6 +11,13 @@ All service control occurs here, starting, stopping, and monitoring needed
 servers.
 '''
 
+# Requires version 3, say it now rather than fail mysteriously later
+import sys
+if (sys.version_info.major < 3):
+    print ("Requires python 3")
+    import os
+    os._exit(1)
+
 # Library imports
 import argparse                         # read/parse command-line options
 import os
@@ -208,7 +215,15 @@ def command (func):
     '''
     Tagging annotation for methods, adds the attribute "command" to the function.
 
-    Used in the System class to designate which functions are commands.
+    Used in the System class to designate which functions are commands, by
+    applying an attribute to only those functions.  You can then iterate over
+    all the functions in the class and figure out which ones are commands.
+
+    Example:
+        @command
+        def f (self):
+            pass
+        hasattr (f, "command")    # True
     '''
     setattr (func, "command", None)
     return func
@@ -256,7 +271,7 @@ class System (object):
             names = database.collection_names ()
             print ("    database '{}' has {} collections".format (
                 self.options.dbname, len (names)))
-            client.disconnect ()
+            client.close ()
         except pymongo.errors.InvalidName as ex:
             print ("Invalid database name: {}".format (str (ex)))
         except Exception as ex:

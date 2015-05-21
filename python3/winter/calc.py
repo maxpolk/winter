@@ -5,6 +5,13 @@
 Calc server that recalculates resources after they have been changed.
 '''
 
+# Requires version 3, say it now rather than fail mysteriously later
+import sys
+if (sys.version_info.major < 3):
+    print ("Requires python 3")
+    import os
+    os._exit(1)
+
 # Library imports
 import pymongo
 

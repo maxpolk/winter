@@ -6,6 +6,13 @@ Copyright (C) 2012,2014,2015  Max Polk <maxpolk@gmail.com>
 License located at http://www.gnu.org/licenses/agpl-3.0.html
 '''
 
+# Requires version 3, say it now rather than fail mysteriously later
+import sys
+if (sys.version_info.major < 3):
+    print ("Requires python 3")
+    import os
+    os._exit(1)
+
 import unittest
 
 from winter import initiate, notify, calc, web
