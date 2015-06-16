@@ -11,12 +11,11 @@ All service control occurs here, starting, stopping, and monitoring needed
 servers.
 '''
 
-# Requires version 3, say it now rather than fail mysteriously later
+# Requires version 3, say it now rather than fail mysteriously later.
+# Won't work if you use Python 3 exclusive syntax anywhere in the file.
 import sys
 if (sys.version_info.major < 3):
-    print ("Requires python 3")
-    import os
-    os._exit(1)
+    exit ("Requires python 3")
 
 # Library imports
 import argparse                         # read/parse command-line options
@@ -248,8 +247,8 @@ class System (object):
                 raise Exception ("ERROR: unknown command {}".format (command))
 
     @command
-    def hello (self):
-        '''Command to print hello and do nothing else.'''
+    def run (self):
+        '''Command to run Winter, launching all the parts based on database.'''
         print ("Hello")
 
     @command

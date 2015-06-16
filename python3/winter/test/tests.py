@@ -1,17 +1,16 @@
 '''
-Script to run tests.
+Script to run tests, called by bin/runtests.
 
 This file is part of Winter, a wiki-based computing platform.
 Copyright (C) 2012,2014,2015  Max Polk <maxpolk@gmail.com>
 License located at http://www.gnu.org/licenses/agpl-3.0.html
 '''
 
-# Requires version 3, say it now rather than fail mysteriously later
+# Requires version 3, say it now rather than fail mysteriously later.
+# Won't work if you use Python 3 exclusive syntax anywhere in the file.
 import sys
 if (sys.version_info.major < 3):
-    print ("Requires python 3")
-    import os
-    os._exit(1)
+    exit ("Requires python 3")
 
 import unittest
 
