@@ -21,6 +21,7 @@ if (sys.version_info.major < 3):
 import argparse                         # read/parse command-line options
 import os
 import pymongo
+import multiprocessing
 
 from configparser import ConfigParser
 
@@ -32,9 +33,42 @@ module_description = "initiate server module"
 
 class Setup (object):
     '''
-    Sets up all options from command-line and config file, writes config file.
-    Then creates a System object with all the options looked up and resolved.
+    The constructor sets up all options and commands from the command-line and
+    config file, then optionally writes your options to a config file to simply
+    startup next time.  The createSystem method returns a System object you can
+    call runCommands on to run the commands you setup.
+
+    Example to skip configuration file, provide alternate db host, execute "run" command:
+
+    >>>> setup = Setup (["--noconfig", "--dbhost", "192.168.1.103", "run"])
+    >>>> setup.createSystem ().runCommands ()
+
+    Example writing to default config file ~/.winterrc an alternative profile called
+    "dbtest" with the command to "test_db_connection", then exiting.
+
+    >>>> Setup (["--profile", "dbtest", "--dbhost", "192.168.1.103", "--save"])
+
+    Example to start and run the system using the "dbtest" profile you previously setup:
+
+    >>>> setup = Setup (["--profile", "dbtest", "run"])
+    >>>> setup.createSystem ()
+    >>>> system.runCommands ()
+
+    Example to change default database server and port to simplify running next time:
+
+    >>>> Setup (["--dbhost", "192.168.1.103", "--dbport", "33456", "--save"])
+
+    Example to start and run system using defaults you established:
+
+    >>>> setup = Setup (["run"])
+    >>>> setup.createSystem ().runCommands ()
     '''
+
+    # This is the one thing always loaded first, so global init methods we need to call
+    # go here.  This uses a fresh python interpreter to not inherit anything from
+    # parent.
+    multiprocessing.set_start_method ("spawn")
+
     long_description = "{} ({}): {}".format (
         winter.software_name, winter.software_version, winter.software_description)
 
@@ -112,7 +146,8 @@ class Setup (object):
         # Everything else goes into "commands".
         #
         # We fill choices with methods of System tagged with @command, which
-        # are the only valid command methods in the class.
+        # are the only valid command methods in the class.  If you omit a command
+        # or specify a bad one, there will be an error.
         #
         parser.add_argument (
             "commands",
