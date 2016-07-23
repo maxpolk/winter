@@ -9,7 +9,7 @@ This is the main package of Winter.
 
 # Last two digits of year, followed by two digit month.
 # YYMM of release date, restrict to [0-9]{4} (used by setup.py)
-__software_date__ = "1505"
+__software_date__ = "1607"
 
 # Type of release, use "a" for alpha, "b" for beta, "c" for release candidate,
 # and "" (the empty string) or "final" for final release version.

@@ -9,6 +9,10 @@
 import sys
 import os
 
+# Requires version 3, say it now rather than fail mysteriously later
+if (sys.version_info.major < 3):
+    exit ("Requires python 3")
+
 # We are in a bin subdir, but parent dir is where packages are found
 sys.path.append (os.path.join (os.path.dirname (__file__), '..'))
 

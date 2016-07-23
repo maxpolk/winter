@@ -11,8 +11,7 @@ All service control occurs here, starting, stopping, and monitoring needed
 servers.
 '''
 
-# Requires version 3, say it now rather than fail mysteriously later.
-# Won't work if you use Python 3 exclusive syntax anywhere in the file.
+# Requires version 3, say it now rather than fail mysteriously later
 import sys
 if (sys.version_info.major < 3):
     exit ("Requires python 3")
@@ -64,11 +63,11 @@ class Setup (object):
     >>>> setup.createSystem ().runCommands ()
     '''
 
-    # This is the one thing always loaded first, so global init methods we need to call
-    # go here.  This uses a fresh python interpreter to not inherit anything from
-    # parent.
+    # This is always loaded first, so global init methods go here.
+    # Setting start method causes child python interpreters to not inherit from parent.
     multiprocessing.set_start_method ("spawn")
 
+    # Create a long description from the package init vars
     long_description = "{} ({}): {}".format (
         winter.software_name, winter.software_version, winter.software_description)
 
@@ -165,6 +164,7 @@ class Setup (object):
                 if (default_value is not None and value != default_value):
                     suffix = " (default {})".format (default_value)
                 print ("    {0:15}: {1}{2}".format (name, value, suffix))
+
             # Turn options into a dictionary and iterate
             print ("Parsed command-line options: ")
             option_dict = vars (options)
@@ -172,7 +172,6 @@ class Setup (object):
                 # Get default value for option
                 default_value = parser.get_default (key)
                 value = getattr (options, key) # option_dict[key]
-                is_default = (default_value == value)
                 show (key, value, default_value)
             if len(options.commands) > 1:
                 print ("Parsed command-line commands:")
@@ -186,6 +185,7 @@ class Setup (object):
                 print ("Reading config file {}".format (options.config))
             config = ConfigParser ()
             config.read (options.config)
+
             # Fill in defaults not already inside the config file
             option_dict = vars (options)
             for key in ("dbhost", "dbname", "dbport", "directory"):
@@ -196,6 +196,7 @@ class Setup (object):
                         print ("Adding missing default {} to value {}".format (
                             key, default_value))
                     config.set ("DEFAULT", key, str (default_value))
+
             # Get desired profile, creating if necessary
             if (options.profile != "DEFAULT" and not config.has_section (options.profile)):
                 config.add_section (options.profile)
@@ -203,11 +204,13 @@ class Setup (object):
                 profile = config.defaults ()
             else:
                 profile = config.options (options.profile)
+
             # Dump profile before command-line overrides
             if (options.verbose):
                 print ("Profile values for section {}:".format (options.profile))
                 for key in profile:
                     print ("    {} = {}".format (key, config.get (options.profile, key)))
+
             # Let command options override config file values
             for key in ("dbhost", "dbname", "dbport", "directory"):
                 value = str (getattr (options, key))
@@ -221,11 +224,13 @@ class Setup (object):
                     if (options.verbose):
                         print ("Overriding config option with command-line option {} = {}".format (key, value))
                     config.set (options.profile, key, value)
+
             # Dump profile with overrides, the final values to use
             if (options.verbose):
                 print ("Profile values to use:")
                 for key in profile:
                     print ("    {} = {}".format (key, config.get (options.profile, key)))
+
             # Save options
             if (options.save):
                 # Save config file
