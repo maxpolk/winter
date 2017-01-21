@@ -18,9 +18,9 @@ sys.path.append (os.path.join (os.path.dirname (__file__), '..'))
 
 from winter.initiate import Setup
 
-# Setup options
+# Setup options from command line arguments
 setup = Setup (sys.argv[1:])
 
-# Setup system and run it
+# Create system and run it
 system = setup.createSystem ()
 system.runCommands ()
