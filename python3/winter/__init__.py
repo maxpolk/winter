@@ -9,7 +9,7 @@ This is the main package of Winter.
 
 # Last two digits of year, followed by two digit month.
 # YYMM of release date, restrict to [0-9]{4} (used by setup.py)
-__software_date__ = "1607"
+__software_date__ = "1701"
 
 # Type of release, use "a" for alpha, "b" for beta, "c" for release candidate,
 # and "" (the empty string) or "final" for final release version.
@@ -36,7 +36,7 @@ This project is licensed under version 3 of the GNU Affero General Public Licens
 # License
 software_license = '''
 This file is part of Winter, a wiki-based computing platform.
-Copyright (C) 2015  Max Polk <maxpolk@gmail.com>
+Copyright (C) 2015,2016,2017  Max Polk <maxpolk@gmail.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -53,7 +53,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 software_short_license = '''
-Copyright (C) 2015  Max Polk <maxpolk@gmail.com>
+Copyright (C) 2015,2016,2017  Max Polk <maxpolk@gmail.com>
 License located at http://www.gnu.org/licenses/agpl-3.0.html
 '''
 
