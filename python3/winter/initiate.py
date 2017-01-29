@@ -281,7 +281,23 @@ class System (object):
 
     @command
     def run (self):
-        '''Command to run Winter, launching all the parts based on database.'''
+        '''
+        Command to run Winter, launching all the parts based on database.
+
+        Looks only in deployment collection.
+
+        Finds web components:
+            "component": "web"
+        Expects its setup to contain bindAddress and port:
+            "setup" : { "bindAddress" : "127.0.0.2", "port" : 80 }
+
+        Finds notify components:
+            "component": "notify"
+
+        Finds daemon components:
+            "component": "daemon"
+
+        '''
         print ("Hello")
 
     @command
