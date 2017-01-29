@@ -74,7 +74,7 @@ class Setup (object):
     def __init__ (self, args):
         '''
         Read and return parsed command-line options and command arguments.
-        Command-line options override config file options.
+        Command-line options override config file options; but defaults don't override.
         '''
         # All options always exist because we use defaults if not present
         parser = argparse.ArgumentParser (prog=winter.software_name,
@@ -142,6 +142,18 @@ class Setup (object):
             default = 'winter',
             help = "database name to use inside MongoDB database [default: %(default)s]")
 
+        # DB user: specify user to authenticate to MongoDB database
+        parser.add_argument (
+            "--dbuser",
+            default = None,
+            help = "database user to authenticate as to MongoDB")
+
+        # DB password: specify password to authenticate to MongoDB database
+        parser.add_argument (
+            "--dbpassword",
+            default = None,
+            help = "database password to use when authenticating to MongoDB")
+
         # Everything else goes into "commands".
         #
         # We fill choices with methods of System tagged with @command, which
@@ -186,17 +198,6 @@ class Setup (object):
             config = ConfigParser ()
             config.read (options.config)
 
-            # Fill in defaults not already inside the config file
-            option_dict = vars (options)
-            for key in ("dbhost", "dbname", "dbport", "directory"):
-                # Get default value for option
-                default_value = parser.get_default (key)
-                if (not config.has_option ("DEFAULT", key)):
-                    if (options.verbose):
-                        print ("Adding missing default {} to value {}".format (
-                            key, default_value))
-                    config.set ("DEFAULT", key, str (default_value))
-
             # Get desired profile, creating if necessary
             if (options.profile != "DEFAULT" and not config.has_section (options.profile)):
                 config.add_section (options.profile)
@@ -205,31 +206,23 @@ class Setup (object):
             else:
                 profile = config.options (options.profile)
 
-            # Dump profile before command-line overrides
-            if (options.verbose):
-                print ("Profile values for section {}:".format (options.profile))
-                for key in profile:
-                    print ("    {} = {}".format (key, config.get (options.profile, key)))
-
-            # Let command options override config file values
-            for key in ("dbhost", "dbname", "dbport", "directory"):
-                value = str (getattr (options, key))
-                config_value = config.get (options.profile, key)
-                config_default_value = config.get ("DEFAULT", key)
-                if (options.profile == "DEFAULT" and config_default_value != value):
+            # Override missing command line options with config file values
+            for key in (["dbhost", "dbname", "dbuser", "dbpassword", "directory", "dbport"]):
+                if (key in profile):
+                    # Set option to be what is config file
+                    if (key == "dbport"):
+                        # Integer option
+                        setattr (options, key, int (profile[key]))
+                    else:
+                        # String option
+                        setattr (options, key, profile[key])
                     if (options.verbose):
-                        print ("Overriding default option with command-line option {} = {}".format (key, value))
-                    config.set (options.profile, key, value)
-                if (options.profile != "DEFAULT" and str (parser.get_default (key)) != value and config_value != value):
-                    if (options.verbose):
-                        print ("Overriding config option with command-line option {} = {}".format (key, value))
-                    config.set (options.profile, key, value)
-
-            # Dump profile with overrides, the final values to use
-            if (options.verbose):
-                print ("Profile values to use:")
-                for key in profile:
-                    print ("    {} = {}".format (key, config.get (options.profile, key)))
+                        print ("    {0:15}: {1} (using)".format (key, profile[key]))
+                elif (options.verbose and key in profile):
+                    print ("    {0:15}: {1} (ignoring)".format (key, profile[key]))
+                # Set missing config file entry from command line
+                if (hasattr (options, key) and not key in profile):
+                    config.set (options.profile, key, str (getattr (options, key)))
 
             # Save options
             if (options.save):
@@ -307,8 +300,17 @@ class System (object):
             print ("    server version {}".format (info['version']))
             # Get database and names of collections
             database = client[self.options.dbname]
+            # Try authenticating against the database
+            if (self.options.dbuser):
+                print ("Authenticating as user {}".format (
+                    self.options.dbuser))
+                database.authenticate (self.options.dbuser, self.options.dbpassword)
+                print ("    authenticated to database '{}' as user '{}'".format (self.options.dbname, self.options.dbuser))
+            else:
+                print ("Not using database authentication")
+            # Show collections
             names = database.collection_names ()
-            print ("    database '{}' has {} collections".format (
+            print ("Database '{}' has {} collections".format (
                 self.options.dbname, len (names)))
             client.close ()
         except pymongo.errors.InvalidName as ex:
