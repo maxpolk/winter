@@ -9,8 +9,7 @@
 #
 # Determine the actual directory where this script resides.
 #
-# Code from:
-# http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
+# Code from: http://stackoverflow.com/a/246128/244994
 #
 # To capture return string:   DIR=$(ScriptDirectory)
 # To echo to stdout:          ScriptDirectory
