@@ -73,9 +73,23 @@ class Setup (object):
 
     def __init__ (self, args):
         '''
-        Read and return parsed command-line options and command arguments.
-        Command-line options override config file options; but defaults don't override.
+        Read and return parsed command-line options and command arguments.  Command-line
+        options override config file options; but defaults don't override.  Can't use
+        defaults for parser because it doesn't help us know whether a value of default
+        occurred because the user let it default by omitting it (which we want to
+        override with config file) versus the user specifying the default explicitly
+        (which we want to honor).
         '''
+        # Manually establish application defaults here
+        defaults = {
+            "directory": os.path.expanduser ("~/.winter"),
+            "dbhost": '127.0.0.1',
+            "dbport": 27017,
+            "dbname": 'winter',
+            "dbuser": None,
+            "dbpassword": None
+        }
+
         # All options always exist because we use defaults if not present
         parser = argparse.ArgumentParser (prog=winter.software_name,
                                           usage="%(prog)s [options] [commands]",
@@ -120,38 +134,42 @@ class Setup (object):
         # Directory: dir to be used for file cache, overrides config file value
         parser.add_argument (
             "-d", "--directory",
-            default = os.path.expanduser ("~/.winter"),
-            help = "directory to be used for file cache [default: %(default)s]")
+            default = argparse.SUPPRESS,
+            help = "directory to be used for file cache [default: {}]".format (
+                defaults['directory']))
 
         # DB host: specify hostname where to find MongoDB database
         parser.add_argument (
             "--dbhost",
-            default = '127.0.0.1',
-            help = "hostname of MongoDB database [default: %(default)s]")
+            default = argparse.SUPPRESS,
+            help = "hostname of MongoDB database [default: {}]".format (
+                defaults['dbhost']))
 
         # DB port: specify port number to MongoDB database
         parser.add_argument (
             "--dbport",
-            default = 27017,
+            default = argparse.SUPPRESS,
             type = int,
-            help = "port number of MongoDB database [default: %(default)s]")
+            help = "port number of MongoDB database [default: {}]".format (
+                defaults['dbport']))
 
         # DB name: specify database name to use for MongoDB database
         parser.add_argument (
             "--dbname",
-            default = 'winter',
-            help = "database name to use inside MongoDB database [default: %(default)s]")
+            default = argparse.SUPPRESS,
+            help = "database name to use inside MongoDB database [default: {}]".format (
+                defaults['dbname']))
 
         # DB user: specify user to authenticate to MongoDB database
         parser.add_argument (
             "--dbuser",
-            default = None,
+            default = argparse.SUPPRESS,
             help = "database user to authenticate as to MongoDB")
 
         # DB password: specify password to authenticate to MongoDB database
         parser.add_argument (
             "--dbpassword",
-            default = None,
+            default = argparse.SUPPRESS,
             help = "database password to use when authenticating to MongoDB")
 
         # Everything else goes into "commands".
@@ -169,14 +187,17 @@ class Setup (object):
         # Place results into options variable
         options = parser.parse_args (args)
 
+        # Internal function to show a value
+        def show (name, value, default_value, alt_suffix=None):
+            suffix = ""
+            if (default_value is not None and value != default_value):
+                suffix = " (default {})".format (default_value)
+            elif (alt_suffix):
+                suffix = " ({})".format (alt_suffix)
+            print ("    {0:15}: {1}{2}".format (name, value, suffix))
+
         # If verbose, dump config options gathered
         if (options.verbose):
-            def show (name, value, default_value):
-                suffix = ""
-                if (default_value is not None and value != default_value):
-                    suffix = " (default {})".format (default_value)
-                print ("    {0:15}: {1}{2}".format (name, value, suffix))
-
             # Turn options into a dictionary and iterate
             print ("Parsed command-line options: ")
             option_dict = vars (options)
@@ -201,15 +222,31 @@ class Setup (object):
             # Get desired profile, creating if necessary
             if (options.profile != "DEFAULT" and not config.has_section (options.profile)):
                 config.add_section (options.profile)
+
             if (options.profile == "DEFAULT"):
                 profile = config.defaults ()
             else:
-                profile = config.options (options.profile)
+                profile = {key: config.get (options.profile, key) for key in config.options (options.profile)}
+
+            if (options.verbose):
+                for key in profile:
+                    show (key, profile[key],
+                          config.defaults ()[key] if key in config.defaults() else None)
 
             # Override missing command line options with config file values
-            for key in (["dbhost", "dbname", "dbuser", "dbpassword", "directory", "dbport"]):
-                if (key in profile):
-                    # Set option to be what is config file
+            if (options.verbose):
+                print ("Options in effect:")
+            for key in defaults:
+                if (not hasattr (options, key) and not key in profile):
+                    # Missing everywhere, use default value
+                    if (key == "dbport"):
+                        setattr (options, key, int (defaults[key]))
+                    else:
+                        setattr (options, key, defaults[key])
+                    if (options.verbose):
+                        show (key, defaults[key], None, "from default value")
+                elif (not hasattr (options, key)):
+                    # Missing from command option only, use config file value
                     if (key == "dbport"):
                         # Integer option
                         setattr (options, key, int (profile[key]))
@@ -217,10 +254,11 @@ class Setup (object):
                         # String option
                         setattr (options, key, profile[key])
                     if (options.verbose):
-                        print ("    {0:15}: {1} (using)".format (key, profile[key]))
-                elif (options.verbose and key in profile):
-                    print ("    {0:15}: {1} (ignoring)".format (key, profile[key]))
-                # Set missing config file entry from command line
+                        show (key, profile[key], None, "from config file")
+                elif (options.verbose):
+                    show (key, getattr (options, key), None, "from command line")
+
+                # Prepopulate config file section from command line for profile save
                 if (hasattr (options, key) and not key in profile):
                     config.set (options.profile, key, str (getattr (options, key)))
 
